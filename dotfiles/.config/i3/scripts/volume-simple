@@ -1,0 +1,43 @@
+#!/bin/bash
+
+VOLUME_FILE="$HOME/.cache/i3blocks-volume"
+DELTA=5
+GAMMA=1
+
+function get_volume() {
+    /usr/bin/amixer get Master | grep '%' | head -n1 | awk -F'[][]' '{ print $2 }' | sed 's/%//g'
+}
+
+function get_mute_status() {
+    /usr/bin/amixer get Master | grep 'Playback.*\[.*\]' | head -n1 | awk -F'[][]' '{ print $4 }'
+}
+
+function update_display() {
+    volume=$(get_volume)
+    muted=$(get_mute_status)
+    icon=$(if [ "$muted" = "off" ]; then echo ""; else echo ""; fi)
+    color=$(if [ "$muted" = "off" ]; then echo "#a0a0a0"; else echo "#cdd6f4"; fi)
+    echo "$icon $volume%"
+    echo "$icon $volume%"
+    echo "$color"
+}
+
+case "$BLOCK_BUTTON" in
+    1) # Bal kattintás: Hangerő növelése
+        /usr/bin/amixer set Master "$DELTA%+" > /dev/null 2>&1
+    ;;
+    2) # Középső kattintás: Némítás/Feloldás
+        /usr/bin/amixer set Master toggle > /dev/null 2>&1
+    ;;
+    3) # Jobb kattintás: Hangerő csökkentése
+        /usr/bin/amixer set Master "$DELTA%-" > /dev/null 2>&1
+    ;;
+    4) # Görgő fel: Hangerő növelése
+        /usr/bin/amixer set Master "$GAMMA%+" > /dev/null 2>&1
+    ;;
+    5) # Görgő le: Hangerő csökkentése
+        /usr/bin/amixer set Master "$GAMMA%-" > /dev/null 2>&1
+    ;;
+esac
+
+update_display
